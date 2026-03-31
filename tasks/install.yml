@@ -16,14 +16,14 @@
     owner: root
     group: root
     mode: '0644'
-  when: modules_add_list | length > 0
+  when: modules_load | length > 0
 
 - name: "Load modules now"
   community.general.modprobe:
     name: "{{ item }}"
     state: present
-  loop: "{{ modules_add_list }}"
-  when: modules_add_list | length > 0
+  loop: "{{ modules_load }}"
+  when: modules_load | length > 0
 
 - name: "Blacklisting modules"
   ansible.builtin.template:
@@ -42,3 +42,12 @@
   loop: "{{ modules_blacklist }}"
   failed_when: false
   when: modules_blacklist | length > 0
+
+- name: "Create module options files"
+  ansible.builtin.template:
+    src: modules_options.conf.j2
+    dest: "{{ _modules_modprobe_dir }}/{{ item }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ modules_options }}"
